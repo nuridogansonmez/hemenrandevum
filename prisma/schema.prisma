@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -54,7 +54,7 @@ model Staff {
 model StaffLeave {
   id      String   @id @default(cuid())
   staffId String
-  date    DateTime @db.Date
+  date    DateTime
 
   staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
 
@@ -75,23 +75,17 @@ model WorkingHours {
   @@index([staffId])
 }
 
-enum AppointmentStatus {
-  pending
-  confirmed
-  cancelled
-}
-
 model Appointment {
-  id              String            @id @default(cuid())
+  id              String   @id @default(cuid())
   salonId         String
   serviceId       String
   staffId         String
-  date            DateTime          @db.Date
+  date            DateTime
   time            String
   durationMinutes Int
   customerName    String
   customerPhone   String
-  status          AppointmentStatus @default(pending)
+  status          String   @default("pending")
   noShow          Boolean           @default(false)
   actualAmount    Int?
   createdAt       DateTime          @default(now())
