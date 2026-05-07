@@ -82,8 +82,17 @@ export default async function SalonPage({ params }: Props) {
 
         {/* Appointment widget centered */}
         <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
-          {/* Left: How it works */}
-          <div className="space-y-5">
+          {/* Widget: mobilde 1. sıra, masaüstünde sağ kolon */}
+          <div className="lg:sticky lg:top-24 lg:h-fit lg:order-2">
+            <AppointmentWidget
+              slug={salon.slug}
+              services={services}
+              staff={salon.staff}
+            />
+          </div>
+
+          {/* Left: How it works — mobilde 2. sıra, masaüstünde sol kolon */}
+          <div className="space-y-5 lg:order-1">
             <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-soft">
               <h3 className="mb-5 text-base font-bold text-gray-900">Nasıl Çalışır?</h3>
               <ol className="space-y-5">
@@ -127,14 +136,6 @@ export default async function SalonPage({ params }: Props) {
             )}
           </div>
 
-          {/* Right: Appointment Widget */}
-          <div className="lg:sticky lg:top-24 lg:h-fit">
-            <AppointmentWidget
-              slug={salon.slug}
-              services={services}
-              staff={salon.staff}
-            />
-          </div>
         </div>
       </main>
 
