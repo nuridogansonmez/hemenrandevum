@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Salon {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  phone       String?
+  address     String?
+  createdAt   DateTime @default(now())
+
+  services         Service[]
+  staff            Staff[]
+  appointments     Appointment[]
+  blockedCustomers BlockedCustomer[]
+}
+
+model Service {
+  id              String   @id @default(cuid())
+  salonId         String
+  name            String
+  durationMinutes Int
+  price           Int
+  createdAt       DateTime @default(now())
+
+  salon        Salon         @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@index([salonId])
+}
+
+model Staff {
+  id        String   @id @default(cuid())
+  salonId   String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  salon         Salon          @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  appointments  Appointment[]
+  workingHours  WorkingHours[]
+  leaves        StaffLeave[]
+
+  @@index([salonId])
+}
+
+model StaffLeave {
+  id      String   @id @default(cuid())
+  staffId String
+  date    DateTime @db.Date
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, date])
+  @@index([staffId])
+}
+
+model WorkingHours {
+  id        String @id @default(cuid())
+  staffId   String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, dayOfWeek])
+  @@index([staffId])
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  salonId         String
+  serviceId       String
+  staffId         String
+  date            DateTime          @db.Date
+  time            String
+  durationMinutes Int
+  customerName    String
+  customerPhone   String
+  status          AppointmentStatus @default(pending)
+  noShow          Boolean           @default(false)
+  actualAmount    Int?
+  createdAt       DateTime          @default(now())
+
+  salon   Salon   @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id])
+  staff   Staff   @relation(fields: [staffId], references: [id])
+
+  @@unique([staffId, date, time])
+  @@index([salonId, date])
+  @@index([staffId, date])
+}
+
+model PhoneVerification {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
+
+model BlockedCustomer {
+  id        String   @id @default(cuid())
+  salonId   String
+  phone     String
+  name      String
+  blockedAt DateTime @default(now())
+
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@unique([salonId, phone])
+  @@index([salonId])
+}
